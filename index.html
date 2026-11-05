@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=2160, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Cuenta regresiva | 14 de noviembre</title>
+    <link rel="stylesheet" href="https://use.typekit.net/vsp7vcb.css" />
+    <style>
+      :root {
+        --ancho: 2160px;
+        --alto: 3840px;
+        --blanco: #ffffff;
+        --rojo: #ed0001;
+        --fuente-textos: "widescreen-ex", sans-serif;
+        --fuente-numero: "archivo", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 2160px;
+        height: 3840px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      body {
+        background: #080609;
+      }
+      #pantalla {
+        position: relative;
+        width: var(--ancho);
+        height: var(--alto);
+        overflow: hidden;
+        background: #080609 url("fondo.png") center center / 2160px 3840px no-repeat;
+      }
+      #faltan,
+      #dias,
+      #frase,
+      #contador {
+        position: absolute;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      #faltan {
+        left: 487.5px;
+        top: 1188px;
+        width: 1185px;
+        height: 210px;
+        color: var(--blanco);
+        font-family: var(--fuente-textos);
+        font-size: 200px;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -3.75px;
+        white-space: nowrap;
+      }
+      #contador {
+        top: 1354px;
+        left: 243.75px;
+        width: 1672px;
+        height: 1168px;
+        color: var(--rojo);
+        font-family: var(--fuente-numero);
+        font-size: 1049px;
+        font-weight: 800;
+        line-height: 0.9;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -33.75px;
+        white-space: nowrap;
+      }
+      #dias {
+        top: 2498px;
+        left: 465px;
+        width: 1230px;
+        height: 232.5px;
+        color: var(--blanco);
+        font-family: var(--fuente-textos);
+        font-size: 220px;
+        font-weight: 900;
+        line-height: 1.15;
+        white-space: nowrap;
+      }
+      #frase {
+        top: 2738px;
+        left: 97.5px;
+        width: 1965px;
+        height: 510px;
+        color: var(--blanco);
+        font-family: var(--fuente-textos);
+        font-weight: 900;
+        font-size: 148px;
+        line-height: 1.04;
+        letter-spacing: -3.75px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        text-wrap: balance;
+        overflow-wrap: break-word;
+      }
+      #frase > span {
+        display: block;
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="pantalla" aria-label="Cuenta regresiva al 14 de noviembre">
+      <div id="faltan">FALTAN</div>
+      <div id="contador">--</div>
+      <div id="dias">DÍAS</div>
+      <div id="frase"><span></span></div>
+    </main>
+    <script>
+      "use strict";
+      const frases = [
+        "Para que te pongas la camisa negra",
+        "Para gritar “A dios le pido”",
+        "Para volver a verte",
+        "Para que nada valga sin tu amor",
+        "Para que la vida sea un ratico",
+        "Para vivir un día normal",
+        "Para cantar por ti",
+        "Para que me enamores",
+        "Para pasar una noche contigo",
+        "Para que caigan gotas de agua dulce",
+        "Para que se burlen de tus sentimientos",
+        "Para gritarle a esa persona “Mala Gente”",
+        "Para cambiar el odio por amor",
+        "Para amar la tierra en que naciste"
+      ];
+      const contador = document.getElementById("contador");
+      const faltan = document.getElementById("faltan");
+      const dias = document.getElementById("dias");
+      const frase = document.querySelector("#frase span");
+      let fraseAnterior = -1;
+
+      function diasRestantes() {
+        // Utiliza el calendario colombiano, sin depender de la zona horaria del reproductor.
+        const partes = new Intl.DateTimeFormat("en-US", {
+          timeZone: "America/Bogota",
+          year: "numeric",
+          month: "numeric",
+          day: "numeric"
+        }).formatToParts(new Date());
+        const p = Object.fromEntries(partes.map((v) => [v.type, Number(v.value)]));
+        const hoy = Date.UTC(p.year, p.month - 1, p.day);
+        // Fecha fija de la campaña: 14 de noviembre de 2026. Desde ese día muestra 0.
+        const objetivo = Date.UTC(2026, 10, 14);
+        return Math.max(0, Math.ceil((objetivo - hoy) / 86400000));
+      }
+      function ajustarNumero() {
+        let tam = 1256;
+        contador.style.fontSize = tam + "px";
+        while (contador.scrollWidth > contador.clientWidth && tam > 225) {
+          tam -= 8;
+          contador.style.fontSize = tam + "px";
+        }
+      }
+      function actualizarContador() {
+        const restantes = diasRestantes();
+        contador.textContent = String(restantes);
+        faltan.textContent = restantes === 1 ? "FALTA" : "FALTAN";
+        dias.textContent = restantes === 1 ? "DÍA" : "DÍAS";
+        ajustarNumero();
+      }
+      function ajustarFrase() {
+        let tam = 148;
+        frase.style.fontSize = tam + "px";
+        // Máximo dos líneas dentro de la zona asignada.
+        while ((frase.scrollHeight > 420 || frase.scrollWidth > 1965) && tam > 79) {
+          tam -= 4;
+          frase.style.fontSize = tam + "px";
+        }
+      }
+      function cambiarFrase() {
+        let indice;
+        do {
+          indice = Math.floor(Math.random() * frases.length);
+        } while (indice === fraseAnterior && frases.length > 1);
+        fraseAnterior = indice;
+        frase.textContent = frases[indice];
+        ajustarFrase();
+      }
+      actualizarContador();
+      cambiarFrase();
+      setInterval(actualizarContador, 30 * 1000);
+      setInterval(cambiarFrase, 10 * 1000);
+      document.fonts.ready.then(() => {
+        ajustarNumero();
+        ajustarFrase();
+      });
+    </script>
+  </body>
+</html>
